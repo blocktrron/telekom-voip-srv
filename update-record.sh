@@ -31,17 +31,23 @@ if [ $# -ne 3 ]; then
 	usage
 fi
 
-HOST_FILE=$1
-SRV_RECORD_HOST=$2
-A_RECORD_NAME=$3
+HOST_FILE="$1"
+SRV_RECORD_HOST="$2"
+A_RECORD_NAME="$3"
 
 # Get the SRV record using nslookup
-SRV_RECORD=$(nslookup -type=SRV $SRV_RECORD_HOST | grep -m 1 "service =" | awk '{print $NF}')
+SRV_RECORD="$(nslookup -type=SRV $SRV_RECORD_HOST | grep -m 1 "service =" | awk '{print $NF}')"
 
 echo "SRV record: $SRV_RECORD"
 
 # Resolve the A record of the SRV record
-A_RECORD=$(nslookup -type=A $SRV_RECORD | grep "Address:" | tail -1 | awk '{print $NF}')
+A_RECORD="$(nslookup -type=A $SRV_RECORD | grep "Address:" | tail -1 | awk '{print $NF}')"
+
+# Check if the A record is a valid IPv4 address
+if ! [[ $A_RECORD =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+	echo "A record is not a valid IPv4 address: $A_RECORD"
+	exit 1
+fi
 
 # Generte content for host file. Syntax is as in /etc/hosts
 HOST_FILE_CONTENT="$A_RECORD\t$A_RECORD_NAME"
@@ -49,5 +55,5 @@ HOST_FILE_CONTENT="$A_RECORD\t$A_RECORD_NAME"
 echo "Host file content: $HOST_FILE_CONTENT"
 
 # Write to host file
-echo -e $HOST_FILE_CONTENT > $HOST_FILE
+echo -e "$HOST_FILE_CONTENT" > "$HOST_FILE"
 exit 0
