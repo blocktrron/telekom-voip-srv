@@ -56,4 +56,8 @@ echo "Host file content: $HOST_FILE_CONTENT"
 
 # Write to host file
 echo -e "$HOST_FILE_CONTENT" > "$HOST_FILE"
+
+# Reload dnsmasq
+/etc/init.d/dnsmasq reload
+
 exit 0
